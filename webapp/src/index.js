@@ -1,21 +1,32 @@
-const express = require('express');
+const express = require('express'); 
 const path = require('path');
 const app = express();
 const port = 3000;
 
-const CV_FILENAME = 'CV_GM.png'; 
-
-
+// Dossier public
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// Route principale
 app.get('/', (req, res) => {
+
+    // Récupérer le CV choisi (GM par défaut)
+    const selectedCV = req.query.cv === 'MA' ? 'CV_MA.png' : 'CV_GM.png';
+
+    const title = selectedCV === 'CV_GM.png'
+        ? "CV – Grégoire Marchal"
+        : "CV – Michael Adda";
+
+    const altText = selectedCV === 'CV_GM.png'
+        ? "Curriculum Vitae de Grégoire Marchal"
+        : "Curriculum Vitae de Michael Adda";
+
     const cvContent = `
         <!DOCTYPE html>
         <html lang="fr">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Mon CV DevOps</title>
+            <title>${title}</title>
             <style>
                 body { 
                     margin: 0; 
@@ -31,9 +42,24 @@ app.get('/', (req, res) => {
                     text-align: center; 
                     margin-bottom: 20px; 
                 }
-                .link { 
-                    text-align: center; 
-                    margin-bottom: 20px; 
+                /* Barre en haut */
+                .top-bar {
+                    width: 100%;
+                    padding: 15px;
+                    background-color: #2c3e50;
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
+                    position: sticky;
+                    top: 0;
+                }
+                .top-bar a {
+                    color: white;
+                    text-decoration: none;
+                    font-weight: bold;
+                }
+                .top-bar a:hover {
+                    text-decoration: underline;
                 }
                 .action-button {
                     display: inline-block;
@@ -48,17 +74,15 @@ app.get('/', (req, res) => {
                 .action-button:hover {
                     background-color: #2980b9;
                 }
-                /* Style du conteneur de l'image pour un bel affichage */
                 .cv-image-container {
                     width: 90%; 
-                    max-width: 800px; /* Taille maximale pour desktop */
+                    max-width: 800px;
                     border: 1px solid #ccc;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     border-radius: 8px;
                     overflow: hidden;
                     background-color: white;
                 }
-                /* Rendre l'image responsive */
                 .cv-image-container img {
                     width: 100%; 
                     height: auto;
@@ -67,29 +91,39 @@ app.get('/', (req, res) => {
             </style>
         </head>
         <body>
-            <h1>Mon CV DevOps</h1>
-            <p class="link">
-                <!-- Lien direct vers le PNG pour l'ouvrir en plein écran -->
-                <a href="/${CV_FILENAME}" target="_blank" class="action-button">Ouvrir le CV en plein écran</a>
+
+            <div class="top-bar">
+                <a href="/?cv=GM">CV Grégoire Marchal</a>
+                <a href="/?cv=MA">CV Michael Adda</a>
+            </div>
+
+            <h1>${title}</h1>
+
+            <p>
+                <a href="/${selectedCV}" target="_blank" class="action-button">
+                    Ouvrir le CV en plein écran
+                </a>
             </p>
-            
-            <!-- Affichage de l'image PNG du CV -->
+
             <div class="cv-image-container">
-                <img src="/${CV_FILENAME}" alt="Curriculum Vitae de Grégoire Marchal">
+                <img src="/${selectedCV}" alt="${altText}">
             </div>
 
         </body>
         </html>
     `;
+
     res.send(cvContent);
 });
 
+// Healthcheck
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'UP' });
 });
 
+// Lancement serveur
 const server = app.listen(port, () => {
     console.log(`App listening on port ${port}`);
 });
 
-module.exports = server; 
+module.exports = server;
