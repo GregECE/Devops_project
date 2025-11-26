@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install Node.js
+      apt:
+        name: ['nodejs', 'npm']
+        state: present
+        update_cache: yes
+
+    - name: Install Redis
+      apt:
+        name: redis-server
+        state: present
+
+    - name: Install App Dependencies
+      command: npm install
+      args:
+        chdir: /home/vagrant/app
+
+    - name: Install PM2 globally (to run app in background)
+      npm:
+        name: pm2
+        global: yes
+        state: present
+
+    - name: Start Application
+      command: pm2 start src/index.js --name "my-app"
+      args:
+        chdir: /home/vagrant/app
+      ignore_errors: yes 
