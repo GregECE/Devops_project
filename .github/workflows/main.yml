@@ -43,4 +43,4 @@ jobs:
       with:
         context: ./webapp
         push: true
-        tags: ton_username_docker/ton_projet:latest
+        tags: gregece/devops_project:latest
